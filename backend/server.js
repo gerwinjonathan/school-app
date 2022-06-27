@@ -27,7 +27,7 @@ crudRoutes.route('/').get((req, res) => {
 });
 
 crudRoutes.route('/:id').get((req, res) => {
-    let id = req.params.id;
+    let { id } = req.params;
     Crud.findById(id, (err, result) => {
         if (err) console.log(err);
         else res.json(result);
@@ -37,7 +37,7 @@ crudRoutes.route('/:id').get((req, res) => {
 crudRoutes.route('/add').post((req, res) => {
     let list = new Crud(req.body);
     list.save().then(list => {
-        res.status(200).json({'list': 'Student added successfully'});
+        res.status(200).json({ list: 'Student added successfully' });
     }).catch(err => {
         res.status(400).send('Adding failed');
     });
@@ -47,12 +47,16 @@ crudRoutes.route('/update/:id').post((req, res) => {
     Crud.findById(req.params.id, (err, data) => {
         if (!data) res.status(404).send("Student is not found");
         else {
-            data.student_name = req.body.student_name;
-            data.student_address = req.body.student_address;
-            data.student_number = req.body.student_number;
-            data.student_entry = req.body.student_entry;
-            data.student_year = req.body.student_year;
-            data.student_verification = req.body.student_verification;
+            const { student_name, student_address, student_number, student_entry, student_year, student_verification } = req.body;
+            data = {
+                ...data,
+                student_name,
+                student_address,
+                student_number,
+                student_entry,
+                student_year,
+                student_verification,
+            };
             
             data.save().then(data => {
                 res.json('Data student is updated!');
@@ -64,7 +68,8 @@ crudRoutes.route('/update/:id').post((req, res) => {
 });
 
 crudRoutes.route('/delete/:id').delete((req, res) => {
-    Crud.findByIdAndRemove(req.params.id, (err, data) => {
+    const { id } = req.params;
+    Crud.findByIdAndRemove(id, (err, data) => {
         if (err) return res.status(500).send("There was a problem deleting the user.");
         res.status(200).send(`Student ${data.student_name} was deleted`);
     })
